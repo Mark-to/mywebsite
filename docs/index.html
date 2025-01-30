@@ -1,45 +1,117 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 1,
-   "metadata": {},
-   "outputs": [
-    {
-     "ename": "SyntaxError",
-     "evalue": "unexpected character after line continuation character (282689949.py, line 2)",
-     "output_type": "error",
-     "traceback": [
-      "\u001b[0;36m  Cell \u001b[0;32mIn[1], line 2\u001b[0;36m\u001b[0m\n\u001b[0;31m    f.write(\"!!! lfe like a movie !!!\" \\n )\u001b[0m\n\u001b[0m                                          ^\u001b[0m\n\u001b[0;31mSyntaxError\u001b[0m\u001b[0;31m:\u001b[0m unexpected character after line continuation character\n"
-     ]
-    }
-   ],
-   "source": [
-    "f = open (\"/Users/gerden/Desktop/xixxi.txt\", \"w\")\n",
-    "f.write(\"!!! lfe like a movie !!!\" \\n )\n",
-    "f.close()"
-   ]
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.9.6"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 2
-}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>烟花效果与新年祝福</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        #greeting {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworks"></canvas>
+    <div id="greeting">丹多哥，新年快乐！</div>
+    <script>
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function Particle(x, y, radius, color, speed, angle) {
+            this.x = x;
+            this.y = y;
+            this.radius = radius;
+            this.color = color;
+            this.speed = speed;
+            this.angle = angle;
+            this.friction = 0.95;
+            this.gravity = 1;
+        }
+
+        Particle.prototype.update = function() {
+            this.speed *= this.friction;
+            this.x += Math.cos(this.angle) * this.speed;
+            this.y += Math.sin(this.angle) * this.speed + this.gravity;
+            this.radius *= 0.98;
+        };
+
+        Particle.prototype.draw = function() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+        };
+
+        function createFirework(x, y) {
+            const radius = random(2, 5);
+            const color = `hsl(${random(0, 360)}, 100%, 50%)`;
+            const speed = random(1, 8);
+            const angle = random(0, Math.PI * 2);
+            return new Particle(x, y, radius, color, speed, angle);
+        }
+
+        function explode(x, y) {
+            for (let i = 0; i < 100; i++) {
+                particles.push(createFirework(x, y));
+            }
+        }
+
+        let particles = [];
+
+        function animate() {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.fillStyle = `rgba(0, 0, 0, 0.5)`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'lighter';
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+
+                if (particles[i].radius <= 0.1) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            if (Math.random() < 0.1) {
+                explode(random(0, canvas.width), canvas.height);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
